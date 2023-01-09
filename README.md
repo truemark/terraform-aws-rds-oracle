@@ -3,8 +3,8 @@ This repository creates an Oracle RDS database instance.
 ## Example Usage
 ```
 module "db" {
-  source = "truemark/aws-rds-oracle/aws"
-  version = "0.0.1"
+  source                          = "truemark/aws-rds-oracle/aws"
+  version                         = "0.0.1"
   database_name                   = local.database_name
   allocated_storage               = 100
   archive_bucket_name             = local.archive_bucket_name
