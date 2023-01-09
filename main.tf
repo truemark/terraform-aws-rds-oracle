@@ -1,10 +1,3 @@
-
-# locals {
-#   s3_bucket = "${data.aws_caller_identity.current.account_id}-data-archive"
-#   s3_bucket_arn = "arn:aws:s3:::${data.aws_caller_identity.current.account_id}-data-archive"
-#   s3_bucket_splat = "arn:aws:s3:::${data.aws_caller_identity.current.account_id}-data-archive/*"
-# }
-
 module "db" {
   # https://registry.terraform.io/modules/terraform-aws-modules/rds/aws/latest
   # https://github.com/terraform-aws-modules/terraform-aws-rds/blob/v3.3.0/examples/complete-oracle/main.tf
