@@ -9,7 +9,6 @@ module "db" {
   allocated_storage               = 100
   archive_bucket_name             = "my-archive-bucket-name"
   auto_minor_version_upgrade      = false
-  db_parameters                   = local.db_parameters
   deletion_protection             = true
   engine                          = "oracle-se2"
   engine_version                  = "19.0.0.0.ru-2022-01.rur-2022-01.r1"
