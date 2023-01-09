@@ -16,10 +16,10 @@ variable "apply_immediately" {
 }
 
 variable "archive_bucket_name" {
-   description = "The S3 bucket this db has access to for expdp/impdp."
-   type = string
-   default = null
- }
+  description = "The S3 bucket this db has access to for expdp/impdp."
+  type        = string
+  default     = null
+}
 
 variable "auto_minor_version_upgrade" {
   description = "Indicates that minor engine upgrades will be applied automatically to the DB instance during the maintenance window."
