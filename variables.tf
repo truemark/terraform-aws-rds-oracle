@@ -38,10 +38,40 @@ variable "copy_tags_to_snapshot" {
   default     = false
 }
 
+variable "create_db_option_group" {
+  description = "Whether to create the db option group for the RDS instance"
+  default     = false
+  type        = bool
+}
+
+variable "create_db_parameter_group" {
+  description = "Whether to create the db parameter group for the RDS instance"
+  default     = false
+  type        = bool
+}
+
+variable "create_random_password" {
+  description = "Whether to create random password for RDS primary cluster"
+  type        = bool
+  default     = false
+}
+
 variable "create_security_group" {
   description = "Whether to create the security group for the RDS instance"
   default     = true
   type        = bool
+}
+
+variable "create_db_subnet_group" {
+  description = "Whether to create the db subnet group for the RDS instance"
+  default     = true
+  type        = bool
+}
+
+variable "custom_iam_instance_profile" {
+  description = "RDS custom iam instance profile"
+  type        = string
+  default     = null
 }
 
 variable "database_name" {
@@ -104,10 +134,27 @@ variable "instance_type" {
   default     = "db.r4.large"
 }
 
+variable "is_custom" {
+  type    = bool
+  default = false
+}
+
+variable "kms_key_id" {
+  description = "The ARN for the KMS encryption key. If creating an encrypted replica, set this to the destination KMS ARN. If storage_encrypted is set to true and kms_key_id is not specified the default KMS key created in your account will be used. Be sure to use the full ARN, not a key alias."
+  type        = string
+  default     = null
+}
+
 variable "license_model" {
   description = "The licensing model for Oracle on RDS."
   type        = string
   default     = "license-included"
+}
+
+variable "maintenance_window" {
+  description = "The window to perform maintenance in. Syntax: 'ddd:hh24:mi-ddd:hh24:mi'. Eg: 'Mon:00:00-Mon:03:00'"
+  type        = string
+  default     = null
 }
 
 variable "major_engine_version" {
@@ -116,13 +163,20 @@ variable "major_engine_version" {
   default     = "12.1"
 }
 
+variable "master_iops" {
+  description = "The iops to associate with the master db instance storage."
+  type        = number
+  default     = null
+}
+
 variable "max_allocated_storage" {
-  description = "Maximum storage size in GB."
-  default     = 65535
+  description = "Specifies the value for Storage Autoscaling"
+  type        = number
+  default     = 0
 }
 
 variable "monitoring_interval" {
-  description = "The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the DB instance. To disable collecting Enhanced Monitoring metrics, specify 0."
+  description = "The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the DB instance. To disable collecting Enhanced Monitoring metrics, specify 0. The default is 0. Valid Values: 0, 1, 5, 10, 15, 30, 60"
   type        = number
   default     = 60
 }
@@ -131,6 +185,24 @@ variable "multi_az" {
   description = "Specifies if the RDS instance is multi-AZ."
   type        = bool
   default     = false
+}
+
+variable "option_group_name" {
+  description = "Name of the option group"
+  type        = string
+  default     = null
+}
+
+variable "performance_insights_enabled" {
+  description = "Specifies whether Performance Insights are enabled"
+  type        = bool
+  default     = false
+}
+
+variable "performance_insights_retention_period" {
+  description = "The amount of time in days to retain Performance Insights data. Valid values are `7`, `731` (2 years) or a multiple of `31`"
+  type        = number
+  default     = 7
 }
 
 variable "preferred_backup_window" {
@@ -177,6 +249,12 @@ variable "snapshot_identifier" {
   description = "DB snapshot to create this database from"
   type        = string
   default     = null
+}
+
+variable "storage_type" {
+  description = "One of 'standard' (magnetic), 'gp2' (general purpose SSD), or 'io1' (provisioned IOPS SSD)."
+  type        = string
+  default     = "gp3"
 }
 
 variable "store_master_password_as_secret" {
