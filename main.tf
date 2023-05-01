@@ -50,7 +50,7 @@ module "db" {
   major_engine_version                  = var.major_engine_version
   max_allocated_storage                 = var.is_custom == true ? 0 : var.max_allocated_storage
   monitoring_interval                   = var.is_custom == true ? 0 : var.monitoring_interval
-  monitoring_role_arn                   = aws_iam_role.rds_enhanced_monitoring[0].arn
+  monitoring_role_arn                   = var.is_custom == true ? null : aws_iam_role.rds_enhanced_monitoring[0].arn
   multi_az                              = var.is_custom == true ? false : var.multi_az
   option_group_name                     = var.is_custom == true ? null : aws_db_option_group.oracle_rds[0].name
   password                              = random_password.root_password.result
