@@ -2,22 +2,22 @@ module "db" {
   # https://registry.terraform.io/modules/terraform-aws-modules/rds/aws/latest
   # https://github.com/terraform-aws-modules/terraform-aws-rds/blob/v3.3.0/examples/complete-oracle/main.tf
   source  = "terraform-aws-modules/rds/aws"
-  version = "3.3.0"
+  version = "5.6.0"
 
   # The name of the database to create. Upper is required by Oracle.
   # Can't be more than 8 characters.
-  name = upper(var.database_name)
+  db_name = upper(var.database_name)
 
   #-----------------------------------------------------------------------------
   # Define references to the parameter group. This module does not create it.
-  create_db_parameter_group = false
+  create_db_parameter_group = var.create_db_parameter_group
   # When this rds/aws module is set to create a default parameter group,
   # it takes the name parameter above and uses it
   # to create the parameter group name. This parameter group name can't be
   # capitalized. However, Oracle requires that the database
   # name be capitalized. Therefore, I'm hard coding the
   # parameter group name.
-  parameter_group_name = aws_db_parameter_group.db_parameter_group.id
+  parameter_group_name = var.is_custom == true ? null : aws_db_parameter_group.db_parameter_group[0].id
   # Yes, the parameter is "parameter_group_name", and yes, the corresponding
   # Terraform parameter is "id". Yes, it's confusing.
   #-----------------------------------------------------------------------------
@@ -28,10 +28,13 @@ module "db" {
   apply_immediately                     = var.apply_immediately
   backup_retention_period               = var.backup_retention_period
   copy_tags_to_snapshot                 = var.copy_tags_to_snapshot
-  create_db_option_group                = false
-  create_db_subnet_group                = true
-  create_random_password                = false
+  create_db_option_group                = var.create_db_option_group # not used in custom set to false
+  create_db_subnet_group                = var.create_db_subnet_group
+  create_random_password                = var.create_random_password
+  custom_iam_instance_profile           = var.custom_iam_instance_profile
   db_instance_tags                      = var.tags
+  db_subnet_group_description           = "Subnet group for ${var.instance_name}. Managed by Terraform."
+  db_subnet_group_name                  = var.instance_name
   db_subnet_group_tags                  = var.tags
   deletion_protection                   = var.deletion_protection
   enabled_cloudwatch_logs_exports       = ["alert", "trace", "listener"]
@@ -40,24 +43,29 @@ module "db" {
   family                                = var.family
   identifier                            = var.instance_name
   instance_class                        = var.instance_type
+  iops                                  = var.master_iops
+  kms_key_id                            = var.kms_key_id
   license_model                         = var.license_model
+  maintenance_window                    = var.preferred_maintenance_window
   major_engine_version                  = var.major_engine_version
-  max_allocated_storage                 = var.max_allocated_storage
-  monitoring_interval                   = var.monitoring_interval
-  multi_az                              = var.multi_az
-  option_group_name                     = aws_db_option_group.oracle_rds[0].name
+  max_allocated_storage                 = var.is_custom == true ? 0 : var.max_allocated_storage
+  monitoring_interval                   = var.is_custom == true ? 0 : var.monitoring_interval
+  monitoring_role_name                  = var.is_custom == true ? null : aws_iam_role.rds_enhanced_monitoring[0].arn
+  multi_az                              = var.is_custom == true ? false : var.multi_az
+  option_group_name                     = var.is_custom == true ? null : aws_db_option_group.oracle_rds[0].name
   password                              = random_password.root_password.result
+  performance_insights_enabled          = var.is_custom == true ? false : var.performance_insights_enabled
+  performance_insights_retention_period = var.is_custom == true ? 0 : var.performance_insights_retention_period
   skip_final_snapshot                   = var.skip_final_snapshot
   snapshot_identifier                   = var.snapshot_identifier
   storage_encrypted                     = true
+  storage_type                          = var.storage_type
   subnet_ids                            = var.subnet_ids
   tags                                  = var.tags
   username                              = var.username # defaults to root
   vpc_security_group_ids                = [aws_security_group.db_security_group.id]
-  performance_insights_enabled          = true
-  performance_insights_retention_period = 7
+
   # create_monitoring_role                = true
-  monitoring_role_arn = aws_iam_role.rds_enhanced_monitoring.arn
 }
 
 #-----------------------------------------------------------------------------
@@ -65,6 +73,7 @@ module "db" {
 # create it. This is all to get around the issue with Oracle requiring
 # database names to be in CAPS and
 resource "aws_db_parameter_group" "db_parameter_group" {
+  count       = var.is_custom ? 0 : 1
   name_prefix = var.instance_name
   description = "Terraform managed parameter group for ${var.instance_name}"
   family      = var.family
@@ -82,7 +91,7 @@ resource "aws_db_parameter_group" "db_parameter_group" {
 #-----------------------------------------------------------------------------
 # Define the option group explicitly so we can implement S3 integration
 resource "aws_db_option_group" "oracle_rds" {
-  count                    = 1
+  count                    = var.is_custom ? 0 : 1
   name_prefix              = var.instance_name
   option_group_description = "Oracle RDS Option Group managed by Terraform."
   engine_name              = var.engine
@@ -181,12 +190,14 @@ resource "aws_security_group" "db_security_group" {
 ################################################################################
 
 resource "aws_iam_role" "rds_enhanced_monitoring" {
+  count              = var.is_custom ? 0 : 1
   name               = "rds-enhanced-monitoring-${lower(var.instance_name)}"
   assume_role_policy = data.aws_iam_policy_document.rds_enhanced_monitoring.json
 }
 
 resource "aws_iam_role_policy_attachment" "rds_enhanced_monitoring" {
-  role       = aws_iam_role.rds_enhanced_monitoring.name
+  count      = var.is_custom ? 0 : 1
+  role       = aws_iam_role.rds_enhanced_monitoring[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
 }
 
@@ -210,23 +221,27 @@ data "aws_iam_policy_document" "rds_enhanced_monitoring" {
 ################################################################################
 
 resource "aws_db_instance_role_association" "s3_data_archive" {
+  count                  = var.is_custom ? 0 : 1
   db_instance_identifier = module.db.db_instance_id
   feature_name           = "S3_INTEGRATION"
-  role_arn               = aws_iam_role.s3_data_archive.arn
+  role_arn               = aws_iam_role.s3_data_archive[0].arn
 }
 
 resource "aws_iam_role" "s3_data_archive" {
+  count              = var.is_custom ? 0 : 1
   name               = "s3-data-archive-${lower(var.instance_name)}"
   assume_role_policy = data.aws_iam_policy_document.assume_s3_data_archive_role_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "s3_data_archive" {
-  role = aws_iam_role.s3_data_archive.name
+  count = var.is_custom ? 0 : 1
+  role  = aws_iam_role.s3_data_archive[0].name
   # The actions the role can execute
-  policy_arn = aws_iam_policy.s3_data_archive.arn
+  policy_arn = aws_iam_policy.s3_data_archive[0].arn
 }
 
 resource "aws_iam_policy" "s3_data_archive" {
+  count       = var.is_custom ? 0 : 1
   name        = "s3-data-archive-${lower(var.instance_name)}"
   description = "Terraform managed RDS Instance policy."
   policy      = data.aws_iam_policy_document.exec_s3_data_archive.json
