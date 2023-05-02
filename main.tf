@@ -65,6 +65,12 @@ module "db" {
   username                              = var.username # defaults to root
   vpc_security_group_ids                = [aws_security_group.db_security_group.id]
 
+  timeouts = {
+    create = "${var.db_instance_create_timeout}m"
+    update = "${var.db_instance_update_timeout}m"
+    delete = "${var.db_instance_delete_timeout}m"
+  }
+
   # create_monitoring_role                = true
 }
 

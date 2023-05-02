@@ -80,6 +80,24 @@ variable "database_name" {
   default     = ""
 }
 
+variable "db_instance_create_timeout" {
+  description = "Timeout in minutes to wait when creating the DB instance."
+  type        = number
+  default     = 90
+}
+
+variable "db_instance_update_timeout" {
+  description = "Timeout in minutes to wait when updating the DB instance."
+  type        = number
+  default     = 90
+}
+
+variable "db_instance_delete_timeout" {
+  description = "Timeout in minutes to wait when deleting the DB instance."
+  type        = number
+  default     = 45
+}
+
 variable "db_parameter_group_tags" {
   description = "A map of tags to add to the aws_db_parameter_group resource if one is created."
   default     = {}
