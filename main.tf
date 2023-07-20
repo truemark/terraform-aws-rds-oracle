@@ -121,9 +121,10 @@ resource "aws_db_option_group" "oracle_rds2" {
   option_group_description = "Oracle RDS Option Group managed by Terraform."
   engine_name              = var.engine
   major_engine_version     = var.major_engine_version
-
+  
   option {
     option_name = "OEM_AGENT"
+    db_security_group_memberships = [aws_security_group.db_security_group.id]
     option_settings {
       name  = "AGENT_REGISTRATION_PASSWORD"
       value = var.agent_registration_password
