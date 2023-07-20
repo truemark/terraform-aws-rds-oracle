@@ -342,3 +342,9 @@ variable "tls_cipher_suite" {
   type        = string
   default     = ""
 }
+
+variable "is_enable_oem" {
+  description = "Enables the OEM Agent"
+  type        = number
+  default     = 0
+}

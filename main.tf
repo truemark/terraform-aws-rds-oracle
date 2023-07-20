@@ -113,6 +113,15 @@ resource "aws_db_option_group" "oracle_rds" {
       value = var.time_zone
     }
   }
+}
+
+resource "aws_db_option_group" "oracle_rds2" {
+  count                    = var.is_enable_oem
+  name_prefix              = var.instance_name
+  option_group_description = "Oracle RDS Option Group managed by Terraform."
+  engine_name              = var.engine
+  major_engine_version     = var.major_engine_version
+
   option {
     option_name = "OEM_AGENT"
     option_settings {
