@@ -106,7 +106,40 @@ resource "aws_db_option_group" "oracle_rds" {
   option {
     option_name = "S3_INTEGRATION"
   }
-
+  option {
+    option_name = "Timezone"
+    option_settings {
+      name  = "TIME_ZONE"
+      value = var.time_zone
+    }
+  }
+  option {
+    option_name = "OEM_AGENT"
+    option_settings {
+      name  = "AGENT_REGISTRATION_PASSWORD"
+      value = var.agent_registration_password
+    }
+    option_settings {
+      name  = "ALLOW_TLS_ONLY"
+      value = var.allow_tls_only
+    }
+    option_settings {
+      name  = "MINIMUM_TLS_VERSION"
+      value = var.minimum_tls_version
+    }
+    option_settings {
+      name  = "OMS_HOST"
+      value = var.oms_host
+    }
+    option_settings {
+      name  = "OMS_PORT"
+      value = var.oms_port
+    }
+    option_settings {
+      name  = "TLS_CIPHER_SUITE"
+      value = var.tls_cipher_suite
+    }
+  }
 }
 
 #-----------------------------------------------------------------------------
