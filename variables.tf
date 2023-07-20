@@ -300,3 +300,51 @@ variable "vpc_id" {
   description = "The ID of the VPC to provision into"
   type        = string
 }
+
+variable "time_zone" {
+  description = "The Oracle database time zone"
+  type        = string
+  default     = "UTC"
+}
+
+variable "agent_registration_password" {
+  description = "Specifies the password which agent uses to register with OMS"
+  type        = string
+  default     = "password"
+}
+
+variable "allow_tls_only" {
+  description = "Configures the OEM Agent to support only TLSv1 protocol while the Agent listens as a server"
+  type        = string
+  default     = "false"
+}
+
+variable "minimum_tls_version" {
+  description = "Specifies the minimum TLS version supported by the OEM Agent while the Agent listens as a server"
+  type        = string
+  default     = "TLSv1"
+}
+
+variable "oms_host" {
+  description = "Specifies the OMS host which agent communicates to"
+  type        = string
+  default     = ""
+}
+
+variable "oms_port" {
+  description = "Specifies the OMS port which agent communicates to"
+  type        = string
+  default     = "4903"
+}
+
+variable "tls_cipher_suite" {
+  description = "Configures the OEM Agent to support only TLSv1 protocol while the Agent listens as a server"
+  type        = string
+  default     = ""
+}
+
+variable "is_enable_oem" {
+  description = "Enables the OEM Agent"
+  type        = number
+  default     = 0
+}
