@@ -97,11 +97,16 @@ resource "aws_db_parameter_group" "db_parameter_group" {
 #-----------------------------------------------------------------------------
 # Define the option group explicitly so we can implement S3 integration
 resource "aws_db_option_group" "oracle_rds" {
-  count                    = var.is_custom ? 0 : 1
-  name_prefix              = var.instance_name
+  count = var.is_custom ? 0 : 1
+  #  name_prefix              = var.instance_name
+  #  name              = var.instance_name
   option_group_description = "Oracle RDS Option Group managed by Terraform."
   engine_name              = var.engine
   major_engine_version     = var.major_engine_version
+
+  lifecycle {
+    ignore_changes = [option, ]
+  }
 
   option {
     option_name = "S3_INTEGRATION"
@@ -113,41 +118,43 @@ resource "aws_db_option_group" "oracle_rds" {
       value = var.time_zone
     }
   }
-}
 
-resource "aws_db_option_group" "oracle_rds2" {
-  count                    = var.is_enable_oem
-  name_prefix              = var.instance_name
-  option_group_description = "Oracle RDS Option Group managed by Terraform."
-  engine_name              = var.engine
-  major_engine_version     = var.major_engine_version
-  
-  option {
-    option_name = "OEM_AGENT"
-    db_security_group_memberships = [aws_security_group.db_security_group.id]
-    option_settings {
-      name  = "AGENT_REGISTRATION_PASSWORD"
-      value = var.agent_registration_password
-    }
-    option_settings {
-      name  = "ALLOW_TLS_ONLY"
-      value = var.allow_tls_only
-    }
-    option_settings {
-      name  = "MINIMUM_TLS_VERSION"
-      value = var.minimum_tls_version
-    }
-    option_settings {
-      name  = "OMS_HOST"
-      value = var.oms_host
-    }
-    option_settings {
-      name  = "OMS_PORT"
-      value = var.oms_port
-    }
-    option_settings {
-      name  = "TLS_CIPHER_SUITE"
-      value = var.tls_cipher_suite
+
+  # Add the "OEM_AGENT" option when a specific parameter is set to true
+  dynamic "option" {
+    for_each = var.enable_oem_agent ? [1] : []
+    content {
+      option_name                    = "OEM_AGENT"
+      vpc_security_group_memberships = [aws_security_group.db_security_group.id]
+
+      option_settings {
+        name  = "AGENT_REGISTRATION_PASSWORD"
+        value = var.agent_registration_password
+      }
+      option_settings {
+        name  = "ALLOW_TLS_ONLY"
+        value = var.allow_tls_only
+      }
+      option_settings {
+        name  = "MINIMUM_TLS_VERSION"
+        value = var.minimum_tls_version
+      }
+      option_settings {
+        name  = "OMS_HOST"
+        value = var.oms_host
+      }
+      option_settings {
+        name  = "OMS_PORT"
+        value = var.oms_port
+      }
+      option_settings {
+        name  = "TLS_CIPHER_SUITE"
+        value = var.tls_cipher_suite
+      }
+      option_settings {
+        name  = "AGENT_VERSION"
+        value = var.agent_version
+      }
     }
   }
 }

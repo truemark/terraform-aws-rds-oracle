@@ -340,11 +340,17 @@ variable "oms_port" {
 variable "tls_cipher_suite" {
   description = "Configures the OEM Agent to support only TLSv1 protocol while the Agent listens as a server"
   type        = string
-  default     = ""
+  default     = "-"
 }
 
-variable "is_enable_oem" {
+variable "agent_version" {
+  description = "Set the version of the OEM agent"
+  type        = string
+  default     = "13.5.0.0.v1"
+}
+
+variable "enable_oem_agent" {
   description = "Enables the OEM Agent"
-  type        = number
-  default     = 0
+  type        = bool
+  default     = false
 }
