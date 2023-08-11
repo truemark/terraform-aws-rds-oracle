@@ -53,7 +53,7 @@ module "db" {
   monitoring_role_arn                   = var.is_custom == true ? null : aws_iam_role.rds_enhanced_monitoring[0].arn
   multi_az                              = var.is_custom == true ? false : var.multi_az
   option_group_name                     = var.is_custom == true ? null : aws_db_option_group.oracle_rds[0].name
-  password                              = random_password.root_password.result
+  password                              = var.store_master_password_as_secret ? random_password.root_password.result : null
   performance_insights_enabled          = var.is_custom == true ? false : var.performance_insights_enabled
   performance_insights_retention_period = var.is_custom == true ? 0 : var.performance_insights_retention_period
   skip_final_snapshot                   = var.skip_final_snapshot
@@ -184,6 +184,7 @@ resource "random_password" "root_password" {
 }
 
 data "aws_secretsmanager_secret_version" "db" {
+  count = var.store_master_password_as_secret ? 1 : 0
   # There will only ever be one password here. Hard coding the index.
   secret_id  = aws_secretsmanager_secret.db[0].id
   depends_on = [aws_secretsmanager_secret_version.db]
