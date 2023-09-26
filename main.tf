@@ -27,6 +27,7 @@ module "db" {
   auto_minor_version_upgrade            = var.auto_minor_version_upgrade
   apply_immediately                     = var.apply_immediately
   backup_retention_period               = var.backup_retention_period
+  ca_cert_identifier                    = var.ca_cert_identifier
   copy_tags_to_snapshot                 = var.copy_tags_to_snapshot
   create_db_option_group                = var.create_db_option_group # not used in custom set to false
   create_db_subnet_group                = var.create_db_subnet_group

@@ -33,6 +33,12 @@ variable "backup_retention_period" {
   default     = 7
 }
 
+variable "ca_cert_identifier" {
+  description = "Specifies the identifier of the CA certificate for the DB instance"
+  type        = string
+  default     = "rds-ca-rsa2048-g1"
+}
+
 variable "copy_tags_to_snapshot" {
   description = "Copy all cluster tags to snapshots"
   default     = false
