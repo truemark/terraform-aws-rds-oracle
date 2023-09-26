@@ -35,6 +35,7 @@ The following parameters are supported:
 - archive_bucket_name
 - auto_minor_version_upgrade
 - backup_retention_period
+- ca_cert_identifier
 - copy_tags_to_snapshot
 - create_security_group
 - database_name
