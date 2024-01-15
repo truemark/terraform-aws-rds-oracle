@@ -349,24 +349,6 @@ variable "tls_cipher_suite" {
   default     = ""
 }
 
-variable "is_enable_oem" {
-  description = "Enables the OEM Agent"
-  type        = bool
-  default     = false
-}
-
-variable "is_enable_timezone" {
-  description = "Enables the time_zone"
-  type        = bool
-  default     = false
-}
-
-variable "is_enable_s3integration" {
-  description = "Enables the S3 Integration"
-  type        = bool
-  default     = false
-}
-
 variable "db_options" {
   description = "Map of options"
   type = list(object({
