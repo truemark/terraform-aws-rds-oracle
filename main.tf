@@ -23,38 +23,39 @@ module "db" {
   #-----------------------------------------------------------------------------
 
   # parameter_group_use_name_prefix = false
-  allocated_storage                     = var.allocated_storage
-  auto_minor_version_upgrade            = var.auto_minor_version_upgrade
-  apply_immediately                     = var.apply_immediately
-  backup_retention_period               = var.backup_retention_period
-  ca_cert_identifier                    = var.ca_cert_identifier
-  copy_tags_to_snapshot                 = var.copy_tags_to_snapshot
-  create_db_option_group                = var.create_db_option_group # not used in custom set to false
-  create_db_subnet_group                = var.create_db_subnet_group
-  create_random_password                = var.create_random_password
-  custom_iam_instance_profile           = var.custom_iam_instance_profile
-  db_instance_tags                      = var.tags
-  db_subnet_group_description           = "Subnet group for ${var.instance_name}. Managed by Terraform."
-  db_subnet_group_name                  = var.instance_name
-  db_subnet_group_tags                  = var.tags
-  deletion_protection                   = var.deletion_protection
-  enabled_cloudwatch_logs_exports       = var.is_custom == true ? [] : ["alert", "trace", "listener"]
-  engine                                = var.engine
-  engine_version                        = var.engine_version
-  family                                = var.family
-  identifier                            = var.instance_name
-  instance_class                        = var.instance_type
-  iops                                  = var.master_iops
-  kms_key_id                            = var.kms_key_id
-  license_model                         = var.license_model
-  maintenance_window                    = var.preferred_maintenance_window
-  major_engine_version                  = var.major_engine_version
-  max_allocated_storage                 = var.is_custom == true ? 0 : var.max_allocated_storage
-  monitoring_interval                   = var.is_custom == true ? 0 : var.monitoring_interval
-  monitoring_role_arn                   = var.is_custom == true ? null : aws_iam_role.rds_enhanced_monitoring[0].arn
-  multi_az                              = var.is_custom == true ? false : var.multi_az
-  option_group_name                     = var.instance_name
-  options                               = var.db_options
+  allocated_storage               = var.allocated_storage
+  auto_minor_version_upgrade      = var.auto_minor_version_upgrade
+  apply_immediately               = var.apply_immediately
+  backup_retention_period         = var.backup_retention_period
+  ca_cert_identifier              = var.ca_cert_identifier
+  copy_tags_to_snapshot           = var.copy_tags_to_snapshot
+  create_db_option_group          = var.create_db_option_group # not used in custom set to false
+  create_db_subnet_group          = var.create_db_subnet_group
+  create_random_password          = var.create_random_password
+  custom_iam_instance_profile     = var.custom_iam_instance_profile
+  db_instance_tags                = var.tags
+  db_subnet_group_description     = "Subnet group for ${var.instance_name}. Managed by Terraform."
+  db_subnet_group_name            = var.instance_name
+  db_subnet_group_tags            = var.tags
+  deletion_protection             = var.deletion_protection
+  enabled_cloudwatch_logs_exports = var.is_custom == true ? [] : ["alert", "trace", "listener"]
+  engine                          = var.engine
+  engine_version                  = var.engine_version
+  family                          = var.family
+  identifier                      = var.instance_name
+  instance_class                  = var.instance_type
+  iops                            = var.master_iops
+  kms_key_id                      = var.kms_key_id
+  license_model                   = var.license_model
+  maintenance_window              = var.preferred_maintenance_window
+  major_engine_version            = var.major_engine_version
+  max_allocated_storage           = var.is_custom == true ? 0 : var.max_allocated_storage
+  monitoring_interval             = var.is_custom == true ? 0 : var.monitoring_interval
+  monitoring_role_arn             = var.is_custom == true ? null : aws_iam_role.rds_enhanced_monitoring[0].arn
+  multi_az                        = var.is_custom == true ? false : var.multi_az
+  option_group_name               = var.instance_name
+  options                         = var.db_options
+  #parameters                            = var.db_parameters
   password                              = var.store_master_password_as_secret ? random_password.root_password.result : null
   performance_insights_enabled          = var.is_custom == true ? false : var.performance_insights_enabled
   performance_insights_retention_period = var.is_custom == true ? 0 : var.performance_insights_retention_period
@@ -87,7 +88,7 @@ resource "aws_db_parameter_group" "db_parameter_group" {
   family      = var.family
   tags        = var.tags
   dynamic "parameter" {
-    for_each = var.db_options
+    for_each = var.db_parameters
     content {
       name         = parameter.value.name
       value        = parameter.value.value
