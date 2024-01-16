@@ -349,8 +349,14 @@ variable "tls_cipher_suite" {
   default     = ""
 }
 
-variable "is_enable_oem" {
-  description = "Enables the OEM Agent"
-  type        = number
-  default     = 0
+variable "db_options" {
+  description = "Map of options"
+  type = list(object({
+    option_name = string
+    option_settings = list(object({
+      name  = string
+      value = string
+    }))
+  }))
+  default = []
 }

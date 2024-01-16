@@ -53,7 +53,8 @@ module "db" {
   monitoring_interval                   = var.is_custom == true ? 0 : var.monitoring_interval
   monitoring_role_arn                   = var.is_custom == true ? null : aws_iam_role.rds_enhanced_monitoring[0].arn
   multi_az                              = var.is_custom == true ? false : var.multi_az
-  option_group_name                     = var.is_custom == true ? null : aws_db_option_group.oracle_rds[0].name
+  option_group_name                     = var.instance_name
+  options                               = var.db_options
   password                              = var.store_master_password_as_secret ? random_password.root_password.result : null
   performance_insights_enabled          = var.is_custom == true ? false : var.performance_insights_enabled
   performance_insights_retention_period = var.is_custom == true ? 0 : var.performance_insights_retention_period
@@ -86,68 +87,11 @@ resource "aws_db_parameter_group" "db_parameter_group" {
   family      = var.family
   tags        = var.tags
   dynamic "parameter" {
-    for_each = var.db_parameters
+    for_each = var.db_options
     content {
       name         = parameter.value.name
       value        = parameter.value.value
       apply_method = parameter.value.apply_method
-    }
-  }
-}
-
-#-----------------------------------------------------------------------------
-# Define the option group explicitly so we can implement S3 integration
-resource "aws_db_option_group" "oracle_rds" {
-  count                    = var.is_custom ? 0 : 1
-  name_prefix              = var.instance_name
-  option_group_description = "Oracle RDS Option Group managed by Terraform."
-  engine_name              = var.engine
-  major_engine_version     = var.major_engine_version
-
-  option {
-    option_name = "S3_INTEGRATION"
-  }
-  option {
-    option_name = "Timezone"
-    option_settings {
-      name  = "TIME_ZONE"
-      value = var.time_zone
-    }
-  }
-}
-
-resource "aws_db_option_group" "oracle_rds2" {
-  count                    = var.is_enable_oem
-  name_prefix              = var.instance_name
-  option_group_description = "Oracle RDS Option Group managed by Terraform."
-  engine_name              = var.engine
-  major_engine_version     = var.major_engine_version
-
-  option {
-    option_name = "OEM_AGENT"
-    option_settings {
-      name  = "AGENT_REGISTRATION_PASSWORD"
-      value = var.agent_registration_password
-    }
-    option_settings {
-      name  = "ALLOW_TLS_ONLY"
-      value = var.allow_tls_only
-    }
-    option_settings {
-      name  = "MINIMUM_TLS_VERSION"
-      value = var.minimum_tls_version
-    }
-    option_settings {
-      name  = "OMS_HOST"
-      value = var.oms_host
-    }
-    option_settings {
-      name  = "OMS_PORT"
-      value = var.oms_port
-    }
-    option_settings {
-      name  = "TLS_CIPHER_SUITE"
-      value = var.tls_cipher_suite
     }
   }
 }
