@@ -54,6 +54,8 @@ The following parameters are supported:
 - max_allocated_storage
 - monitoring_interval
 - multi_az
+- options
+- option_group_description
 - preferred_backup_window
 - preferred_maintenance_window
 - random_password_length
