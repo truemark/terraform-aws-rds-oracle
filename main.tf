@@ -55,6 +55,7 @@ module "db" {
   multi_az                        = var.is_custom == true ? false : var.multi_az
   option_group_name               = var.instance_name
   options                         = var.db_options
+  option_group_description        = var.option_group_description
   #parameters                            = var.db_parameters
   password                              = var.store_master_password_as_secret ? random_password.root_password.result : null
   performance_insights_enabled          = var.is_custom == true ? false : var.performance_insights_enabled

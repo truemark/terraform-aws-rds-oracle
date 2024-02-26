@@ -84,3 +84,12 @@ output "db_enhanced_monitoring_iam_role_arn" {
   description = "The Amazon Resource Name (ARN) specifying the monitoring role"
   value       = module.db.enhanced_monitoring_iam_role_arn
 }
+
+output "db_options" {
+  value = var.db_options
+}
+
+output "db_security_group_id" {
+  description = "The ID of the security group associated with the RDS instance"
+  value       = aws_security_group.db_security_group.id
+}

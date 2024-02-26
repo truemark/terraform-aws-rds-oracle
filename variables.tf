@@ -351,12 +351,12 @@ variable "tls_cipher_suite" {
 
 variable "db_options" {
   description = "Map of options"
-  type = list(object({
-    option_name = string
-    option_settings = list(object({
-      name  = string
-      value = string
-    }))
-  }))
-  default = []
+  type        = any
+  default     = []
+}
+
+variable "option_group_description" {
+  description = "The description of the option group"
+  type        = string
+  default     = null
 }
