@@ -350,7 +350,7 @@ variable "tls_cipher_suite" {
 }
 
 variable "db_options" {
-  description = "Map of options"
+  description = "Map of db options"
   type        = any
   default     = []
 }

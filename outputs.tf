@@ -86,7 +86,8 @@ output "db_enhanced_monitoring_iam_role_arn" {
 }
 
 output "db_options" {
-  value = var.db_options
+  description = "A list of database options to apply"
+  value       = var.db_options
 }
 
 output "db_security_group_id" {
