@@ -41,6 +41,7 @@ The following parameters are supported:
 - database_name
 - db_parameter_group_tags
 - db_parameters
+- db_subnet_group_name
 - deletion_protection
 - egress_cidrs
 - engine
