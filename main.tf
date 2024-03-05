@@ -35,7 +35,7 @@ module "db" {
   custom_iam_instance_profile     = var.custom_iam_instance_profile
   db_instance_tags                = var.tags
   db_subnet_group_description     = "Subnet group for ${var.instance_name}. Managed by Terraform."
-  db_subnet_group_name            = var.instance_name
+  db_subnet_group_name            = var.db_subnet_group_name
   db_subnet_group_tags            = var.tags
   deletion_protection             = var.deletion_protection
   enabled_cloudwatch_logs_exports = var.is_custom == true ? [] : ["alert", "trace", "listener"]
