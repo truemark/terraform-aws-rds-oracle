@@ -1,12 +1,18 @@
+variable "agent_registration_password" {
+  description = "Specifies the password which agent uses to register with OMS"
+  type        = string
+  default     = "password"
+}
+
 variable "allocated_storage" {
   description = "Storage size in GB."
   default     = 100
 }
 
-variable "allowed_cidr_blocks" {
-  description = "A list of CIDR blocks which are allowed to access the database"
-  type        = list(string)
-  default     = ["10.0.0.0/8"]
+variable "allow_tls_only" {
+  description = "Configures the OEM Agent to support only TLSv1 protocol while the Agent listens as a server"
+  type        = string
+  default     = "false"
 }
 
 variable "apply_immediately" {
@@ -56,6 +62,12 @@ variable "create_db_parameter_group" {
   type        = bool
 }
 
+variable "create_db_subnet_group" {
+  description = "Whether to create the db subnet group for the RDS instance"
+  default     = true
+  type        = bool
+}
+
 variable "create_random_password" {
   description = "Whether to create random password for RDS primary cluster"
   type        = bool
@@ -66,18 +78,6 @@ variable "create_security_group" {
   description = "Whether to create the security group for the RDS instance"
   default     = true
   type        = bool
-}
-
-variable "create_db_subnet_group" {
-  description = "Whether to create the db subnet group for the RDS instance"
-  default     = true
-  type        = bool
-}
-
-variable "custom_iam_instance_profile" {
-  description = "RDS custom iam instance profile"
-  type        = string
-  default     = null
 }
 
 variable "database_name" {
@@ -104,6 +104,12 @@ variable "db_instance_delete_timeout" {
   default     = 45
 }
 
+variable "db_options" {
+  description = "Map of db options"
+  type        = any
+  default     = []
+}
+
 variable "db_parameter_group_tags" {
   description = "A map of tags to add to the aws_db_parameter_group resource if one is created."
   default     = {}
@@ -115,13 +121,21 @@ variable "db_parameters" {
   default     = [{}]
 }
 
+variable "db_subnet_group_name" {
+  description = "Name of DB subnet group. DB instance will be created in the VPC associated with the DB subnet group. If unspecified, will be created in the default VPC"
+  type        = string
+  default     = null
+}
+
 variable "deletion_protection" {
   type    = bool
   default = false
 }
 
 variable "egress_cidrs" {
-  default = ["0.0.0.0/0"]
+  description = "A list of CIDR blocks which are allowed to access the database"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
 }
 
 variable "engine" {
@@ -143,7 +157,9 @@ variable "family" {
 }
 
 variable "ingress_cidrs" {
-  default = ["0.0.0.0/0"]
+  description = "A list of CIDR blocks which are allowed to access the database"
+  type        = list(string)
+  default     = ["10.0.0.0/8"]
 }
 
 variable "instance_name" {
@@ -158,11 +174,6 @@ variable "instance_type" {
   default     = "db.r4.large"
 }
 
-variable "is_custom" {
-  type    = bool
-  default = false
-}
-
 variable "kms_key_id" {
   description = "The ARN for the KMS encryption key. If creating an encrypted replica, set this to the destination KMS ARN. If storage_encrypted is set to true and kms_key_id is not specified the default KMS key created in your account will be used. Be sure to use the full ARN, not a key alias."
   type        = string
@@ -175,16 +186,16 @@ variable "license_model" {
   default     = "license-included"
 }
 
-variable "maintenance_window" {
-  description = "The window to perform maintenance in. Syntax: 'ddd:hh24:mi-ddd:hh24:mi'. Eg: 'Mon:00:00-Mon:03:00'"
-  type        = string
-  default     = null
-}
-
 variable "major_engine_version" {
   description = "Oracle database engine version."
   type        = string
   default     = "12.1"
+}
+
+variable "manage_master_user_password" {
+  description = "Set to true to allow RDS to manage the master user password in Secrets Manager"
+  type        = bool
+  default     = true
 }
 
 variable "master_iops" {
@@ -193,10 +204,21 @@ variable "master_iops" {
   default     = null
 }
 
+variable "master_username" {
+  description = "The master database account to create."
+  default     = "admin"
+}
+
 variable "max_allocated_storage" {
   description = "Specifies the value for Storage Autoscaling"
   type        = number
   default     = 0
+}
+
+variable "minimum_tls_version" {
+  description = "Specifies the minimum TLS version supported by the OEM Agent while the Agent listens as a server"
+  type        = string
+  default     = "TLSv1"
 }
 
 variable "monitoring_interval" {
@@ -209,6 +231,24 @@ variable "multi_az" {
   description = "Specifies if the RDS instance is multi-AZ."
   type        = bool
   default     = false
+}
+
+variable "oms_host" {
+  description = "Specifies the OMS host which agent communicates to"
+  type        = string
+  default     = ""
+}
+
+variable "oms_port" {
+  description = "Specifies the OMS port which agent communicates to"
+  type        = string
+  default     = "4903"
+}
+
+variable "option_group_description" {
+  description = "The description of the option group"
+  type        = string
+  default     = null
 }
 
 variable "option_group_name" {
@@ -252,17 +292,6 @@ variable "security_group_tags" {
   default     = {}
 }
 
-variable "share" {
-  default = false
-  type    = bool
-}
-
-variable "share_tags" {
-  description = "Additional tags for the resource access manager share."
-  type        = map(string)
-  default     = {}
-}
-
 variable "skip_final_snapshot" {
   description = "Should a final snapshot be created on cluster destroy"
   type        = bool
@@ -297,72 +326,13 @@ variable "tags" {
   default     = {}
 }
 
-variable "username" {
-  description = "The master database account to create."
-  default     = "root"
-}
-
-variable "vpc_id" {
-  description = "The ID of the VPC to provision into"
-  type        = string
-}
-
-variable "time_zone" {
-  description = "The Oracle database time zone"
-  type        = string
-  default     = "UTC"
-}
-
-variable "agent_registration_password" {
-  description = "Specifies the password which agent uses to register with OMS"
-  type        = string
-  default     = "password"
-}
-
-variable "allow_tls_only" {
-  description = "Configures the OEM Agent to support only TLSv1 protocol while the Agent listens as a server"
-  type        = string
-  default     = "false"
-}
-
-variable "minimum_tls_version" {
-  description = "Specifies the minimum TLS version supported by the OEM Agent while the Agent listens as a server"
-  type        = string
-  default     = "TLSv1"
-}
-
-variable "oms_host" {
-  description = "Specifies the OMS host which agent communicates to"
-  type        = string
-  default     = ""
-}
-
-variable "oms_port" {
-  description = "Specifies the OMS port which agent communicates to"
-  type        = string
-  default     = "4903"
-}
-
 variable "tls_cipher_suite" {
   description = "Configures the OEM Agent to support only TLSv1 protocol while the Agent listens as a server"
   type        = string
   default     = ""
 }
 
-variable "db_options" {
-  description = "Map of db options"
-  type        = any
-  default     = []
-}
-
-variable "option_group_description" {
-  description = "The description of the option group"
+variable "vpc_id" {
+  description = "The ID of the VPC to provision into"
   type        = string
-  default     = null
-}
-
-variable "db_subnet_group_name" {
-  description = "Name of DB subnet group. DB instance will be created in the VPC associated with the DB subnet group. If unspecified, will be created in the default VPC"
-  type        = string
-  default     = null
 }

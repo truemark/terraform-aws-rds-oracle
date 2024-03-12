@@ -2,7 +2,7 @@ module "db" {
   # https://registry.terraform.io/modules/terraform-aws-modules/rds/aws/latest
   # https://github.com/terraform-aws-modules/terraform-aws-rds/blob/v3.3.0/examples/complete-oracle/main.tf
   source  = "terraform-aws-modules/rds/aws"
-  version = "5.6.0"
+  version = "6.5.2"
 
   # The name of the database to create. Upper is required by Oracle.
   # Can't be more than 8 characters.
@@ -17,7 +17,7 @@ module "db" {
   # capitalized. However, Oracle requires that the database
   # name be capitalized. Therefore, I'm hard coding the
   # parameter group name.
-  parameter_group_name = var.is_custom == true ? null : aws_db_parameter_group.db_parameter_group[0].id
+  parameter_group_name = aws_db_parameter_group.db_parameter_group.id
   # Yes, the parameter is "parameter_group_name", and yes, the corresponding
   # Terraform parameter is "id". Yes, it's confusing.
   #-----------------------------------------------------------------------------
@@ -29,16 +29,14 @@ module "db" {
   backup_retention_period         = var.backup_retention_period
   ca_cert_identifier              = var.ca_cert_identifier
   copy_tags_to_snapshot           = var.copy_tags_to_snapshot
-  create_db_option_group          = var.create_db_option_group # not used in custom set to false
+  create_db_option_group          = var.create_db_option_group
   create_db_subnet_group          = var.create_db_subnet_group
-  create_random_password          = var.create_random_password
-  custom_iam_instance_profile     = var.custom_iam_instance_profile
   db_instance_tags                = var.tags
   db_subnet_group_description     = "Subnet group for ${var.instance_name}. Managed by Terraform."
   db_subnet_group_name            = var.db_subnet_group_name != null ? var.db_subnet_group_name : var.instance_name
   db_subnet_group_tags            = var.tags
   deletion_protection             = var.deletion_protection
-  enabled_cloudwatch_logs_exports = var.is_custom == true ? [] : ["alert", "trace", "listener"]
+  enabled_cloudwatch_logs_exports = ["alert", "trace", "listener"]
   engine                          = var.engine
   engine_version                  = var.engine_version
   family                          = var.family
@@ -49,24 +47,25 @@ module "db" {
   license_model                   = var.license_model
   maintenance_window              = var.preferred_maintenance_window
   major_engine_version            = var.major_engine_version
-  max_allocated_storage           = var.is_custom == true ? 0 : var.max_allocated_storage
-  monitoring_interval             = var.is_custom == true ? 0 : var.monitoring_interval
-  monitoring_role_arn             = var.is_custom == true ? null : aws_iam_role.rds_enhanced_monitoring[0].arn
-  multi_az                        = var.is_custom == true ? false : var.multi_az
+  manage_master_user_password     = var.manage_master_user_password
+  max_allocated_storage           = var.max_allocated_storage
+  monitoring_interval             = var.monitoring_interval
+  monitoring_role_arn             = aws_iam_role.rds_enhanced_monitoring.arn
+  multi_az                        = var.multi_az
   option_group_name               = var.instance_name
   options                         = var.db_options
   option_group_description        = var.option_group_description
   #parameters                            = var.db_parameters
   password                              = var.store_master_password_as_secret ? random_password.root_password.result : null
-  performance_insights_enabled          = var.is_custom == true ? false : var.performance_insights_enabled
-  performance_insights_retention_period = var.is_custom == true ? 0 : var.performance_insights_retention_period
+  performance_insights_enabled          = var.performance_insights_enabled
+  performance_insights_retention_period = var.performance_insights_retention_period
   skip_final_snapshot                   = var.skip_final_snapshot
   snapshot_identifier                   = var.snapshot_identifier
   storage_encrypted                     = true
   storage_type                          = var.storage_type
   subnet_ids                            = var.subnet_ids
   tags                                  = var.tags
-  username                              = var.username # defaults to root
+  username                              = var.master_username
   vpc_security_group_ids                = [aws_security_group.db_security_group.id]
 
   timeouts = {
@@ -74,8 +73,6 @@ module "db" {
     update = "${var.db_instance_update_timeout}m"
     delete = "${var.db_instance_delete_timeout}m"
   }
-
-  # create_monitoring_role                = true
 }
 
 #-----------------------------------------------------------------------------
@@ -83,7 +80,6 @@ module "db" {
 # create it. This is all to get around the issue with Oracle requiring
 # database names to be in CAPS and
 resource "aws_db_parameter_group" "db_parameter_group" {
-  count       = var.is_custom ? 0 : 1
   name_prefix = var.instance_name
   description = "Terraform managed parameter group for ${var.instance_name}"
   family      = var.family
@@ -102,7 +98,7 @@ resource "aws_db_parameter_group" "db_parameter_group" {
 resource "aws_secretsmanager_secret" "db" {
   count       = var.store_master_password_as_secret ? 1 : 0
   name_prefix = "database/${var.instance_name}/master-"
-  description = "Master password for ${var.username} in ${var.instance_name}"
+  description = "Master password for ${var.master_username} in ${var.instance_name}"
   tags        = var.tags
 }
 
@@ -110,7 +106,7 @@ resource "aws_secretsmanager_secret_version" "db" {
   count     = var.store_master_password_as_secret ? 1 : 0
   secret_id = aws_secretsmanager_secret.db[count.index].id
   secret_string = jsonencode({
-    "username"       = "root"
+    "username"       = var.master_username
     "password"       = random_password.root_password.result
     "host"           = module.db.db_instance_address
     "port"           = module.db.db_instance_port
@@ -186,14 +182,12 @@ resource "aws_security_group" "db_security_group" {
 ################################################################################
 
 resource "aws_iam_role" "rds_enhanced_monitoring" {
-  count              = var.is_custom ? 0 : 1
   name               = "rds-enhanced-monitoring-${lower(var.instance_name)}"
   assume_role_policy = data.aws_iam_policy_document.rds_enhanced_monitoring.json
 }
 
 resource "aws_iam_role_policy_attachment" "rds_enhanced_monitoring" {
-  count      = var.is_custom ? 0 : 1
-  role       = aws_iam_role.rds_enhanced_monitoring[0].name
+  role       = aws_iam_role.rds_enhanced_monitoring.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
 }
 
@@ -217,27 +211,23 @@ data "aws_iam_policy_document" "rds_enhanced_monitoring" {
 ################################################################################
 
 resource "aws_db_instance_role_association" "s3_data_archive" {
-  count                  = var.is_custom ? 0 : 1
-  db_instance_identifier = module.db.db_instance_id
+  db_instance_identifier = lower(module.db.db_instance_name)
   feature_name           = "S3_INTEGRATION"
-  role_arn               = aws_iam_role.s3_data_archive[0].arn
+  role_arn               = aws_iam_role.s3_data_archive.arn
 }
 
 resource "aws_iam_role" "s3_data_archive" {
-  count              = var.is_custom ? 0 : 1
   name               = "s3-data-archive-${lower(var.instance_name)}"
   assume_role_policy = data.aws_iam_policy_document.assume_s3_data_archive_role_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "s3_data_archive" {
-  count = var.is_custom ? 0 : 1
-  role  = aws_iam_role.s3_data_archive[0].name
+  role = aws_iam_role.s3_data_archive.name
   # The actions the role can execute
-  policy_arn = aws_iam_policy.s3_data_archive[0].arn
+  policy_arn = aws_iam_policy.s3_data_archive.arn
 }
 
 resource "aws_iam_policy" "s3_data_archive" {
-  count       = var.is_custom ? 0 : 1
   name        = "s3-data-archive-${lower(var.instance_name)}"
   description = "Terraform managed RDS Instance policy."
   policy      = data.aws_iam_policy_document.exec_s3_data_archive.json
