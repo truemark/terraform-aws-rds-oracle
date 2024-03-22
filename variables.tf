@@ -6,7 +6,7 @@ variable "agent_registration_password" {
 
 variable "allocated_storage" {
   description = "Storage size in GB."
-  default     = 100
+  default     = 200
 }
 
 variable "allow_tls_only" {
@@ -52,7 +52,7 @@ variable "copy_tags_to_snapshot" {
 
 variable "create_db_option_group" {
   description = "Whether to create the db option group for the RDS instance"
-  default     = false
+  default     = true
   type        = bool
 }
 
@@ -141,19 +141,19 @@ variable "egress_cidrs" {
 variable "engine" {
   description = "Oracle database engine."
   type        = string
-  default     = "oracle-se2"
+  default     = "oracle-ee"
 }
 
 variable "engine_version" {
   description = "Oracle database engine version."
   type        = string
-  default     = "12.1.0.2.v19"
+  default     = "19.0.0.0.ru-2023-01.rur-2023-01.r2"
 }
 
 variable "family" {
   description = "The family of the DB parameter group"
   type        = string
-  default     = "oracle-se2-12.1"
+  default     = "oracle-ee-19"
 }
 
 variable "ingress_cidrs" {
@@ -171,7 +171,7 @@ variable "instance_name" {
 variable "instance_type" {
   description = "Instance type to use at master instance. If instance_type_replica is not set it will use the same type for replica instances"
   type        = string
-  default     = "db.r4.large"
+  default     = "db.r6i.large"
 }
 
 variable "kms_key_id" {
@@ -189,19 +189,19 @@ variable "license_model" {
 variable "major_engine_version" {
   description = "Oracle database engine version."
   type        = string
-  default     = "12.1"
+  default     = "19"
 }
 
 variable "manage_master_user_password" {
   description = "Set to true to allow RDS to manage the master user password in Secrets Manager"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "master_iops" {
   description = "The iops to associate with the master db instance storage."
   type        = number
-  default     = null
+  default     = 12000
 }
 
 variable "master_username" {
