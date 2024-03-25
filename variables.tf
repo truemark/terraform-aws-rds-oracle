@@ -195,7 +195,7 @@ variable "major_engine_version" {
 variable "manage_master_user_password" {
   description = "Set to true to allow RDS to manage the master user password in Secrets Manager"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "master_iops" {
@@ -311,8 +311,8 @@ variable "storage_type" {
 }
 
 variable "store_master_password_as_secret" {
-  description = "Toggle on or off storing the root password in Secrets Manager."
-  default     = true
+  description = "Set to true to allow self-management of the master user password in Secrets Manager"
+  default     = false
 }
 
 variable "subnet_ids" {
