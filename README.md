@@ -1,5 +1,25 @@
 This repository creates an Oracle RDS database instance. 
 
+## Miminal Usage
+```
+module "db" {
+  source                          = "truemark/aws-rds-oracle/aws"
+  version                         = "0.0.12"
+  
+  archive_bucket_name         = "123456789-data-archive"
+  instance_name               = "DB_NAME"
+  kms_key_id                  = join("", data.aws_kms_alias.db.*.target_key_arn)
+  license_model               = "bring-your-own-license"
+  db_parameters               = []
+  subnet_ids                  = ["subnet-0613436966e999", "subnet-0613436966ea998"]
+  tags = {
+    "automation:id"               = "stack_name"
+    "automation:url"              = "stack_url"
+  }
+  vpc_id                      = "vpc-0a6c8fae7776adb32"
+}
+```
+
 ## Example Usage
 ```
 module "db" {
