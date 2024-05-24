@@ -148,6 +148,7 @@ The following parameters are supported:
 - options
 - option_group_description
 - option_group_name
+- password
 - performance_insights_enabled
 - performance_insights_retention_period
 - preferred_backup_window
