@@ -66,7 +66,7 @@ module "db" {
   options                         = var.db_options
   option_group_description        = var.option_group_description
   #parameters                            = var.db_parameters
-  password                              = var.store_master_password_as_secret ? random_password.root_password.result : null
+  password                              = var.store_master_password_as_secret ? random_password.root_password.result : var.password
   performance_insights_enabled          = var.performance_insights_enabled
   performance_insights_retention_period = var.performance_insights_retention_period
   skip_final_snapshot                   = var.skip_final_snapshot
