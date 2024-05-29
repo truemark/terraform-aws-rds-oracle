@@ -257,6 +257,16 @@ variable "option_group_name" {
   default     = null
 }
 
+variable "password" {
+  description = <<EOF
+  Password for the master DB user. Note that this may show up in logs, and it will be stored in the state file.
+  The password provided will not be used if `manage_master_user_password` is set to true.
+  EOF
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
 variable "performance_insights_enabled" {
   description = "Specifies whether Performance Insights are enabled"
   type        = bool
@@ -308,11 +318,6 @@ variable "storage_type" {
   description = "One of 'standard' (magnetic), 'gp2' (general purpose SSD), or 'io1' (provisioned IOPS SSD)."
   type        = string
   default     = "gp3"
-}
-
-variable "store_master_password_as_secret" {
-  description = "Set to true to allow self-management of the master user password in Secrets Manager"
-  default     = false
 }
 
 variable "subnet_ids" {

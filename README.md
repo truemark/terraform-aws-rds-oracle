@@ -42,7 +42,6 @@ module "db" {
   multi_az                        = false
   random_password_length          = 16
   skip_final_snapshot             = false
-  store_master_password_as_secret = true
   subnet_ids                      = [ "subnet-0613436966e999", "subnet-0613436966ea998" ]
   vpc_id                          = "vpc-0a6c8fae7776adb32"
   
@@ -91,7 +90,6 @@ module "db" {
   random_password_length          = 16
   skip_final_snapshot             = false
   storage_type                    = "io1"
-  store_master_password_as_secret = true
   subnet_ids                      = ["subnet-0613436966e999", "subnet-0613436966ea998"]
   tags = {
     "owner"                       = "owner_name"
@@ -148,6 +146,7 @@ The following parameters are supported:
 - options
 - option_group_description
 - option_group_name
+- password
 - performance_insights_enabled
 - performance_insights_retention_period
 - preferred_backup_window
@@ -157,7 +156,6 @@ The following parameters are supported:
 - skip_final_snapshot
 - snapshot_identifier
 - storage_type
-- store_master_password_as_secret
 - subnet_ids
 - tags
 - tls_cipher_suite

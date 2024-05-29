@@ -66,7 +66,7 @@ module "db" {
   options                         = var.db_options
   option_group_description        = var.option_group_description
   #parameters                            = var.db_parameters
-  password                              = var.store_master_password_as_secret ? random_password.root_password.result : null
+  password                              = var.manage_master_user_password ? null : (var.password != null ? var.password : random_password.root_password.result)
   performance_insights_enabled          = var.performance_insights_enabled
   performance_insights_retention_period = var.performance_insights_retention_period
   skip_final_snapshot                   = var.skip_final_snapshot
@@ -106,18 +106,18 @@ resource "aws_db_parameter_group" "db_parameter_group" {
 
 #-----------------------------------------------------------------------------
 resource "aws_secretsmanager_secret" "db" {
-  count       = var.store_master_password_as_secret ? 1 : 0
+  count       = var.manage_master_user_password ? 0 : 1
   name_prefix = "database/${var.instance_name}/master-"
   description = "Master password for ${var.master_username} in ${var.instance_name}"
   tags        = local.tags
 }
 
 resource "aws_secretsmanager_secret_version" "db" {
-  count     = var.store_master_password_as_secret ? 1 : 0
+  count     = var.manage_master_user_password ? 0 : 1
   secret_id = aws_secretsmanager_secret.db[count.index].id
   secret_string = jsonencode({
     "username"       = var.master_username
-    "password"       = random_password.root_password.result
+    "password"       = var.password != null ? var.password : random_password.root_password.result
     "host"           = module.db.db_instance_address
     "port"           = module.db.db_instance_port
     "dbname"         = module.db.db_instance_name
@@ -137,7 +137,7 @@ resource "random_password" "root_password" {
 }
 
 data "aws_secretsmanager_secret_version" "db" {
-  count = var.store_master_password_as_secret ? 1 : 0
+  count = var.manage_master_user_password ? 0 : 1
   # There will only ever be one password here. Hard coding the index.
   secret_id  = aws_secretsmanager_secret.db[0].id
   depends_on = [aws_secretsmanager_secret_version.db]
