@@ -12,7 +12,7 @@ module "db" {
   # https://registry.terraform.io/modules/terraform-aws-modules/rds/aws/latest
   # https://github.com/terraform-aws-modules/terraform-aws-rds/blob/v3.3.0/examples/complete-oracle/main.tf
   source  = "terraform-aws-modules/rds/aws"
-  version = "6.5.4"
+  version = "6.6.0"
 
   # The name of the database to create. Upper is required by Oracle.
   # Can't be more than 8 characters.
